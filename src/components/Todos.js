@@ -4,7 +4,7 @@ import Todo from './Todo'
 
 const Todos = ({ todos }) => {
     return (
-        <VStack align="stretch">
+        <VStack align="stretch" maxH='80vh' spacing="20px" w="500px">
             <List>
                 {todos.map(todo =>
                     <ListItem key={todo.title}>

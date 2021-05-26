@@ -1,23 +1,14 @@
 import './styles/App.css';
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { initTodosReducer } from './reducers/todoReducer'
+import { NewTodo } from './components/Todo'
+import axios from 'axios'
 
 import Todos from './components/Todos'
-import { Container, Grid, GridItem, Heading, Wrap, Text, VStack, Box, Flex } from '@chakra-ui/layout';
-import {
-    Drawer,
-    DrawerBody,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerOverlay,
-    DrawerContent,
-    DrawerCloseButton,
-    Button,
-    Input,
-    useDisclosure,
-    Textarea,
-    FormLabel,
-  } from "@chakra-ui/react"
+
+import { Container, Grid, GridItem, Heading, Text, VStack, Box, Flex, SimpleGrid } from '@chakra-ui/layout';
+
 
 
 const MenuButton = ({text}) => (
@@ -30,82 +21,28 @@ const MenuButton = ({text}) => (
     </Box>
 )
 
-const NewTodo = () => {
-
-    const dispatch = useDispatch()
-
-    const { isOpen, onOpen, onClose } = useDisclosure()
-    const btnRef = React.useRef()
-  
-
-    const addTodo = (event) => {
-    event.preventDefault()
-    console.log('clicked')
-    console.log(event)
-    console.log(event.target[0].value)
-    const newTodo = {
-      title: event.target[0].value,
-      info: event.target[1].value,
-      status: 'unfinished'
-    }
-
-    dispatch({
-      type: 'NEW_TODO',
-      data: newTodo
-    })
-        onClose()
-    }
-    
-    return (
-        <div>
-        <Button ref={btnRef} colorScheme="teal" onClick={onOpen}>
-            Add new Todo :)
-        </Button>
-        <Drawer
-            isOpen={isOpen}
-            placement="right"
-            onClose={onClose}
-            finalFocusRef={btnRef}
-        >
-            <DrawerOverlay />
-            <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerHeader>Add new task</DrawerHeader>
-                <DrawerBody>
-                    <form onSubmit={addTodo} id='add_todo_form'>
-                        <FormLabel>Title:</FormLabel>
-                        <Input placeholder="Type here..." />
-                        <FormLabel>Info:</FormLabel>
-                        <Textarea></Textarea>
-                    </form>
-                </DrawerBody>
-                <DrawerFooter>
-                    <Button variant="outline" mr={3} onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button bg="#009f77" type="submit" form='add_todo_form'>Save</Button>
-            </DrawerFooter>
-        </DrawerContent>
-            </Drawer>
-        </div>
-    )
-}
-
 const App = () => {
+    const dispatch = useDispatch()
+    console.log('here app')
+    useEffect(() => {
+        dispatch(initTodosReducer())
+    }, [])
 
-  const todos = useSelector(state => state.todos)
-  
+    const todos = useSelector(state => state.todos)
 
-//#51d0d3
 
-  return (
-      <Flex bg='#E6E6FA' alignContent="center" justifyContent="center" h="100vh" fontFamily={['Courier New', 'Courier', 'monospace']}>
-        <Container>
+//#51d0d3 blue backgroundcolor
+
+  /*return (
+      <Flex bg='#E6E6FA' h="1500px" fontFamily={['Courier New', 'Courier', 'monospace']}
+      minW='900px' maxW='1000px'
+      >
+        <Container alignContent='left' ml={0} >
         <Heading color='#200a74' size='4xl' p={10} textShadow="4px 2px #ffffff">
             Todo
         </Heading>
         <Grid
-          templateRows="repeat(2, 1fr)"
+          templateRows="repeat(4, 1fr)"
           templateColumns="repeat(4, 1fr)"
           columnGap={10}
         >
@@ -119,15 +56,40 @@ const App = () => {
             </VStack>
           </GridItem>
           <GridItem rowSpan={1} colSpan={3}>
-            <NewTodo />
+            <NewTodo dispatch={dispatch}/>
           </GridItem>
-          <GridItem rowSpan={1} colSpan={3}>
+          <GridItem rowSpan={3} colSpan={3}>
           {todos.length !== 0 ? <Todos todos={todos}/> : <Text>No todos jet :(</Text>}
           </GridItem>
         </Grid>
         </Container>
       </Flex>
-    
+  )*/
+  return (
+    <Flex bg='#E6E6FA' h="1500px" fontFamily={['Courier New', 'Courier', 'monospace']}
+    minW='900px' maxW='1000px'
+    >
+        <Container alignContent='left' ml={0} >
+        <Heading color='#200a74' size='4xl' p={10} textShadow="4px 2px #ffffff">
+            Todo
+        </Heading>
+        <SimpleGrid columns={2} spacing={10}>
+            <VStack
+                p={0}
+            >
+                <MenuButton text="All"/>
+                <MenuButton text="Unfinished"/>
+                <MenuButton text="Done"/>
+            </VStack>
+            <VStack
+                p={0} align='left'
+            >
+                <NewTodo dispatch={dispatch}/>
+                {todos.length !== 0 ? <Todos todos={todos}/> : <Text>No todos jet :(</Text>}
+            </VStack>
+        </SimpleGrid>
+        </Container>
+    </Flex>
   )
 }
 
