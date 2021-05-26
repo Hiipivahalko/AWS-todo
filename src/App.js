@@ -67,7 +67,7 @@ const App = () => {
   )*/
   return (
     <Flex bg='#E6E6FA' h="1500px" fontFamily={['Courier New', 'Courier', 'monospace']}
-    minW='900px' maxW='1000px'
+    minW='900px' maxW='1000px' marginLeft='auto' marginRight='auto'
     >
         <Container alignContent='left' ml={0} >
         <Heading color='#200a74' size='4xl' p={10} textShadow="4px 2px #ffffff">
