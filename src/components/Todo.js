@@ -1,118 +1,150 @@
 import React from 'react'
 
-import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 
-import { Heading, Text, Box } from '@chakra-ui/layout';
+import { Heading, Text, Box, VStack, HStack } from '@chakra-ui/layout';
 import {
-    Drawer,
-    DrawerBody,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerOverlay,
-    DrawerContent,
-    DrawerCloseButton,
     Button,
-    Input,
-    useDisclosure,
-    Textarea,
-    FormLabel,
+    Menu,
+    MenuButton,
+    IconButton,
+    MenuItem,
+    MenuList,
+    AlertDialog,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
+    Select,
+    Tag,
+    Badge
 } from "@chakra-ui/react"
 
-const api = 'https://jwg0kd20kj.execute-api.eu-west-1.amazonaws.com/dev'
+import { DragHandleIcon } from '@chakra-ui/icons'
 
 
 
- export const NewTodo = () => {
+//const api = 'https://jwg0kd20kj.execute-api.eu-west-1.amazonaws.com/dev'
 
-    const dispatch = useDispatch()
+const ConfirmTodo = ({ todo, dispatch, button_color, text, button_text }) => {
 
-    const { isOpen, onOpen, onClose } = useDisclosure()
-    const btnRef = React.useRef()
-  
+    const [isOpen, setIsOpen] = React.useState(false)
+    const onClose = () => setIsOpen(false)
+    const cancelRef = React.useRef()
 
-    const addTodo = (event) => {
-    event.preventDefault()
-    console.log('clicked')
-    console.log(event)
-    console.log(event.target[0].value)
-    const newTodo = {
-        title: event.target[0].value,
-        info: event.target[1].value,
-        status: 'unfinished'
-    }
-
-    axios.post(api, newTodo)
-        .then((response) => {
-            console.log(response.data.body)
-            //body = response.data.body
-            dispatch({
-                type: 'NEW_TODO',
-                data: response.data.body
-            })
+    const updateStatus = (event) => {
+        event.preventDefault()
+        dispatch({
+            type: 'UPDATE_TODO_STATUS',
+            todo: todo
         })
-        .catch((error) => {
-            console.log(error)
-        })
-
-    
         onClose()
     }
-    
+
     return (
         <div>
-        <Button ref={btnRef} colorScheme="teal" onClick={onOpen}>
-            Add new Todo :)
-        </Button>
-        <Drawer
-            isOpen={isOpen}
-            placement="right"
-            onClose={onClose}
-            finalFocusRef={btnRef}
-        >
-            <DrawerOverlay />
-            <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerHeader>Add new task</DrawerHeader>
-                <DrawerBody>
-                    <form onSubmit={addTodo} id='add_todo_form'>
-                        <FormLabel>Title:</FormLabel>
-                        <Input placeholder="Type here..." />
-                        <FormLabel>Info:</FormLabel>
-                        <Textarea></Textarea>
-                    </form>
-                </DrawerBody>
-                <DrawerFooter>
-                    <Button variant="outline" mr={3} onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button bg="#009f77" type="submit" form='add_todo_form'>Save</Button>
-            </DrawerFooter>
-        </DrawerContent>
-            </Drawer>
+            <Button bg={button_color} onClick={() => setIsOpen(true)}>
+                {button_text}
+            </Button>
+
+            <AlertDialog
+                isOpen={isOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={onClose}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            {text}
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onClose}>
+                                Cancel
+                            </Button>
+                            <Button bg={button_color} onClick={updateStatus} ml={3}>
+                                Confirm
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
         </div>
     )
 }
 
-const TodoText = ({text}) => (
-    <Text color="#200a74" mt={3}>
+
+const TodoText = ({ text, cl }) => (
+    <Text color={cl} mt={3}>
         {text}
     </Text>
 )
 
+const Todo = ({ todo, dispatch }) => {
+    // #51d0d3
+    // #fb8793
 
-const Todo = ({ todo }) => {
+    const bg_color = todo.status === 'unfinished' ? '#F6D9BB' : 'green.200'
+    const bg_color2 = todo.status === 'unfinished' ? 'red.200' : 'green.300'
+    const text_color = '#200A74'//todo.status === 'unfinished' ? '#200a74' : '#ffffff'
+    let pr_cl = 'black'
+    if (todo.priority === 'Low') {
+        pr_cl = 'yellow.200'
+    } else if (todo.priority === 'High') {
+        pr_cl = 'orange.200'
+    } else {
+        pr_cl = 'red.200'
+    }
+    //console.log(pr_cl)
     return (
-        <Box 
-            bg="#fb8793" borderWidth="3px" borderColor="#fcd4e1"
-            _hover={{bg:"#fcd4e1", borderColor:"#fb8793"}}
-            p={2}
-        >
-            <Heading color="#200a74" >{todo.title}</Heading>
-            <TodoText text={todo.info} />
-            <TodoText text={todo.status} />
+        <Box
+            bg={bg_color} borderWidth="3px" borderColor="#fb8793"
+            _hover={{ bg: "#fcd4e1", borderColor: "#fb8793" }}
+            p={3}
+        >   
+            <HStack>
+                <Tag size='md' variant="solid" bg={bg_color2} color='black'>{todo.status}</Tag>
+                <Tag size='md' variant="solid" bg={pr_cl} color='black'>{todo.priority}</Tag>
+                <Tag size='md' variant="solid" bg='black' color='white'>{todo.project}</Tag>
+            </HStack>
+            <HStack >
+                <VStack align='left' w='400px'>
+                    <Heading color={text_color} >{todo.title}</Heading>
+                    <TodoText text={todo.time} cl={text_color} />
+                    <TodoText text={todo.info} cl={text_color} />
+                </VStack>
+                <VStack align='right' justifyItems='right'>
+                    <Menu>
+                        <MenuButton
+                            as={IconButton}
+                            aria-label="Options"
+                            icon={<DragHandleIcon />}
+                            variant="outline"
+                            w="10px"
+                            borderColor='orange.300' borderWidth='2px'
+                        />
+                        <MenuList>
+                            <MenuItem>Edit</MenuItem>
+                            <MenuItem>Delete</MenuItem>
+                        </MenuList>
+                    </Menu>
+                    {todo.status === 'unfinished' ? 
+                        <ConfirmTodo 
+                            dispatch={dispatch} todo={todo} button_color='green.200'
+                            text='Confirm Todo as done'
+                            button_text='Mark as done'
+                        /> : 
+                        <ConfirmTodo 
+                            dispatch={dispatch} todo={todo} button_color='red.200'
+                            text='Mark Todo as undone'
+                            button_text='Eiku'
+                        />
+                    }
+                </VStack>
+            </HStack>
+
         </Box>
     )
 }
+
 
 export default Todo
